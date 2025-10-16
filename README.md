@@ -1,6 +1,3 @@
-### README.md
-
-````markdown
 # 🚀 SMS Turbo - Multi-Client Monorepo
 
 A powerful Turborepo monorepo for multi-client SMS applications with dynamic theming, shared components, and API-driven configuration.
@@ -22,22 +19,21 @@ A powerful Turborepo monorepo for multi-client SMS applications with dynamic the
 ### One-Command Install (Recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/your-username/sms-turbo/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/codeninja-404/turbo-gist/main/install.sh | bash
 ```
-````
 
 ### With Custom Project Name
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/your-username/sms-turbo/main/scripts/install.sh | bash -s my-sms-app
+curl -fsSL https://raw.githubusercontent.com/codeninja-404/turbo-gist/main/install.sh | bash -s my-sms-app
 ```
 
 ## 🛠️ Manual Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/sms-turbo.git
-cd sms-turbo
+git clone https://github.com/codeninja-404/turbo-gist.git
+cd turbo-gist
 
 # Install dependencies
 pnpm install
@@ -229,41 +225,3 @@ The included mock server provides theme configuration:
 ## 📄 License
 
 MIT License - see LICENSE file for details
-
-## 🆘 Support
-
-If you encounter any issues:
-
-1. Check the troubleshooting section in documentation
-2. Search existing GitHub issues
-3. Create a new issue with detailed information
-
----
-
-**Happy coding! 🚀**
-
-````
-
-## 🚀 Curl Installation Command
-
-Users can install with this single command:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/your-username/sms-turbo/main/scripts/install.sh | bash
-````
-
-Or with custom project name:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/your-username/sms-turbo/main/scripts/install.sh | bash -s my-project
-```
-
-## 🎯 Key Improvements
-
-1. **All Components in Packages**: Header, Footer, MainLayout, Dashboard, Campaigns all come from `@repo/components`
-2. **Clean Client Structure**: Client apps only contain app-specific code
-3. **True Reusability**: All clients share the exact same components
-4. **Easy Maintenance**: Update components once, all clients benefit
-5. **Consistent Architecture**: Follows monorepo best practices
-
-Now you have a truly scalable monorepo where all components are shared and reusable across all client applications! 🚀
