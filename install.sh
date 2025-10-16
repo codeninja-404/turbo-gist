@@ -54,23 +54,27 @@ mkdir -p "$PROJECT_NAME"
 cd "$PROJECT_NAME"
 
 # Download and extract the project structure
-echo -e "${BLUE}📥 Downloading project template...${NC}"
+echo -e "${BLUE}📥 Creating project structure...${NC}"
 
-# Create the complete project structure
-create_project_structure() {
-    echo -e "${YELLOW}📁 Creating project structure...${NC}"
+# Create basic directory structure
+create_directories() {
+    echo -e "${YELLOW}📁 Creating directory structure...${NC}"
     
-    # Create ALL directories first
     mkdir -p apps/client-template/{public,src} 
     mkdir -p packages/{config,router,theme,ui,utils,store,components}/src
     mkdir -p packages/store/src/{api,slices}
     mkdir -p packages/components/src/{pages,layout}
     mkdir -p scripts mock-server
-
+    
     echo -e "${GREEN}✅ Directory structure created${NC}"
+}
 
-    # Create root files with unique EOF markers
-    cat > package.json << 'ROOTPKGEOF'
+# Create root configuration files
+create_root_files() {
+    echo -e "${YELLOW}📄 Creating root configuration files...${NC}"
+    
+    # package.json
+    cat > package.json << 'EOF'
 {
   "name": "sms-turbo",
   "private": true,
@@ -102,15 +106,17 @@ create_project_structure() {
     "node": ">=20.0.0"
   }
 }
-ROOTPKGEOF
+EOF
 
-    cat > pnpm-workspace.yaml << 'WORKSPACEEOF'
+    # pnpm-workspace.yaml
+    cat > pnpm-workspace.yaml << 'EOF'
 packages:
   - "apps/*"
   - "packages/*"
-WORKSPACEEOF
+EOF
 
-    cat > tsconfig.json << 'TSCONFIGEOF'
+    # tsconfig.json
+    cat > tsconfig.json << 'EOF'
 {
   "compilerOptions": {
     "target": "ESNext",
@@ -133,9 +139,10 @@ WORKSPACEEOF
   ],
   "exclude": ["node_modules", "dist"]
 }
-TSCONFIGEOF
+EOF
 
-    cat > turbo.json << 'TURBOEOF'
+    # turbo.json
+    cat > turbo.json << 'EOF'
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
@@ -151,9 +158,10 @@ TSCONFIGEOF
     "test": {}
   }
 }
-TURBOEOF
+EOF
 
-    cat > .gitignore << 'GITIGNOREEOF'
+    # .gitignore
+    cat > .gitignore << 'EOF'
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -195,36 +203,26 @@ next-env.d.ts
 
 # mock server
 mock-server/node_modules
-GITIGNOREEOF
+EOF
 
     echo -e "${GREEN}✅ Root configuration files created${NC}"
-
-    # Create shared packages
-    create_shared_packages
-    # Create client template
-    create_client_template
-    # Create scripts
-    create_scripts
-    # Create mock server
-    create_mock_server
-    # Create README
-    create_readme
 }
 
+# Create shared packages
 create_shared_packages() {
     echo -e "${YELLOW}📦 Creating shared packages...${NC}"
     
     # packages/config
-    cat > packages/config/package.json << 'CONFIGPKGEOF'
+    cat > packages/config/package.json << 'EOF'
 {
   "name": "@repo/config",
   "version": "1.0.0",
   "main": "src/index.ts",
   "types": "src/index.ts"
 }
-CONFIGPKGEOF
+EOF
 
-    cat > packages/config/src/index.ts << 'CONFIGSRCEOF'
+    cat > packages/config/src/index.ts << 'EOF'
 // Shared env and global config
 export const getEnv = (key: string, fallback?: string): string => {
   return import.meta.env[key] || fallback || '';
@@ -243,10 +241,10 @@ export const getThemeConfig = () => ({
   apiUrl: getEnv('VITE_API_URL', 'http://localhost:3001'),
   clientId: getEnv('VITE_CLIENT_ID', 'default')
 });
-CONFIGSRCEOF
+EOF
 
     # packages/router
-    cat > packages/router/package.json << 'ROUTERPKGEOF'
+    cat > packages/router/package.json << 'EOF'
 {
   "name": "@repo/router",
   "version": "1.0.0",
@@ -257,9 +255,9 @@ CONFIGSRCEOF
     "react-router-dom": "^6.30.0"
   }
 }
-ROUTERPKGEOF
+EOF
 
-    cat > packages/router/src/index.tsx << 'ROUTERSRCEOF'
+    cat > packages/router/src/index.tsx << 'EOF'
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import React from "react";
 
@@ -274,10 +272,10 @@ export const AppRouter: React.FC<AppRouterProps> = ({ routes }) => (
 );
 
 export { Outlet };
-ROUTERSRCEOF
+EOF
 
     # packages/theme
-    cat > packages/theme/package.json << 'THEMEPKGEOF'
+    cat > packages/theme/package.json << 'EOF'
 {
   "name": "@repo/theme",
   "version": "1.0.0",
@@ -289,9 +287,9 @@ ROUTERSRCEOF
     "postcss": "^8.5.1"
   }
 }
-THEMEPKGEOF
+EOF
 
-    cat > packages/theme/src/index.ts << 'THEMESRCEOF'
+    cat > packages/theme/src/index.ts << 'EOF'
 import type { Config } from "tailwindcss";
 
 export const themeConfig: Config = {
@@ -318,10 +316,10 @@ export const getRuntimeColorStyles = (primaryColor: string) => `
   .text-primary { color: ${primaryColor}; }
   .border-primary { border-color: ${primaryColor}; }
 `;
-THEMESRCEOF
+EOF
 
     # packages/ui
-    cat > packages/ui/package.json << 'UIPKGEOF'
+    cat > packages/ui/package.json << 'EOF'
 {
   "name": "@repo/ui",
   "version": "1.0.0",
@@ -332,9 +330,9 @@ THEMESRCEOF
     "antd": "^5.20.0"
   }
 }
-UIPKGEOF
+EOF
 
-    cat > packages/ui/src/index.ts << 'UISRCEOF'
+    cat > packages/ui/src/index.ts << 'EOF'
 export * from "antd";
 export { Button, Card, Space, Typography, Layout, ConfigProvider, theme, Menu, Spin, Table, Tag, Input, Row, Col, Statistic, Progress } from "antd";
 import type { ThemeConfig } from "antd";
@@ -359,10 +357,10 @@ export const createAntdTheme = (primaryColor: string = '#1677ff'): ThemeConfig =
 };
 
 export const defaultAntdTheme = createAntdTheme();
-UISRCEOF
+EOF
 
     # packages/utils
-    cat > packages/utils/package.json << 'UTILSPKGEOF'
+    cat > packages/utils/package.json << 'EOF'
 {
   "name": "@repo/utils",
   "version": "1.0.0",
@@ -372,9 +370,9 @@ UISRCEOF
     "react": "^18.3.1"
   }
 }
-UTILSPKGEOF
+EOF
 
-    cat > packages/utils/src/index.ts << 'UTILSSRCEOF'
+    cat > packages/utils/src/index.ts << 'EOF'
 export const hexToRgba = (hex: string, alpha = 1): string => {
   const cleanHex = hex.replace('#', '');
   const r = parseInt(cleanHex.slice(0, 2), 16);
@@ -414,10 +412,17 @@ export const lightenColor = (hex: string, percent: number): string => {
     (B > 255 ? 255 : B)
   ).toString(16).slice(1);
 };
-UTILSSRCEOF
+EOF
 
+    echo -e "${GREEN}✅ Shared packages created${NC}"
+}
+
+# Create store package
+create_store_package() {
+    echo -e "${YELLOW}🛍️ Creating store package...${NC}"
+    
     # packages/store
-    cat > packages/store/package.json << 'STOREPKGEOF'
+    cat > packages/store/package.json << 'EOF'
 {
   "name": "@repo/store",
   "version": "1.0.0",
@@ -429,16 +434,16 @@ UTILSSRCEOF
     "@repo/config": "workspace:*"
   }
 }
-STOREPKGEOF
+EOF
 
-    cat > packages/store/src/index.ts << 'STORESRCEOF'
+    cat > packages/store/src/index.ts << 'EOF'
 export { store } from './store';
 export type { RootState, AppDispatch } from './store';
 export { useAppSelector, useAppDispatch } from './hooks';
 export { useGetThemeConfigQuery } from './api/themeApi';
-STORESRCEOF
+EOF
 
-    cat > packages/store/src/store.ts << 'STORESTOREEOF'
+    cat > packages/store/src/store.ts << 'EOF'
 import { configureStore } from '@reduxjs/toolkit';
 import { themeApi } from './api/themeApi';
 import themeReducer from './slices/themeSlice';
@@ -454,17 +459,17 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-STORESTOREEOF
+EOF
 
-    cat > packages/store/src/hooks.ts << 'STOREHOOKSEOF'
+    cat > packages/store/src/hooks.ts << 'EOF'
 import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux';
 import type { RootState, AppDispatch } from './store';
 
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
-STOREHOOKSEOF
+EOF
 
-    cat > packages/store/src/slices/themeSlice.ts << 'STORETHEMEEOF'
+    cat > packages/store/src/slices/themeSlice.ts << 'EOF'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface ThemeState {
@@ -498,9 +503,9 @@ const themeSlice = createSlice({
 
 export const { setPrimaryColor, setClientName, setThemeConfig } = themeSlice.actions;
 export default themeSlice.reducer;
-STORETHEMEEOF
+EOF
 
-    cat > packages/store/src/api/themeApi.ts << 'STOREAPIEOF'
+    cat > packages/store/src/api/themeApi.ts << 'EOF'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { getEnv } from '@repo/config';
 
@@ -538,10 +543,16 @@ export const themeApi = createApi({
 });
 
 export const { useGetThemeConfigQuery } = themeApi;
-STOREAPIEOF
+EOF
 
-    # packages/components
-    cat > packages/components/package.json << 'COMPONENTSPKGEOF'
+    echo -e "${GREEN}✅ Store package created${NC}"
+}
+
+# Create components package (simplified)
+create_components_package() {
+    echo -e "${YELLOW}🧩 Creating components package...${NC}"
+    
+    cat > packages/components/package.json << 'EOF'
 {
   "name": "@repo/components",
   "version": "1.0.0",
@@ -556,18 +567,18 @@ STOREAPIEOF
     "react-router-dom": "^6.30.0"
   }
 }
-COMPONENTSPKGEOF
+EOF
 
-    cat > packages/components/src/index.ts << 'COMPONENTSSRCEOF'
+    cat > packages/components/src/index.ts << 'EOF'
 export { Header } from './Header';
 export { Footer } from './Footer';
 export { MainLayout } from './MainLayout';
 export { Dashboard } from './pages/Dashboard';
 export { Campaigns } from './pages/Campaigns';
-COMPONENTSSRCEOF
+EOF
 
-    # Header component
-    cat > packages/components/src/Header.tsx << 'HEADEREOF'
+    # Create basic components
+    cat > packages/components/src/Header.tsx << 'EOF'
 import React from 'react';
 import { Layout, Typography, Space, Button } from '@repo/ui';
 import { useGetThemeConfigQuery } from '@repo/store';
@@ -577,12 +588,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const { Header: AntHeader } = Layout;
 const { Title } = Typography;
 
-interface HeaderProps {
-  onMenuClick?: (key: string) => void;
-  currentPage?: string;
-}
-
-export const Header: React.FC<HeaderProps> = ({ onMenuClick, currentPage }) => {
+export const Header: React.FC = () => {
   const clientId = getEnv('VITE_CLIENT_ID', 'default');
   const { data: themeConfig, isLoading } = useGetThemeConfigQuery(clientId);
   const navigate = useNavigate();
@@ -592,15 +598,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, currentPage }) => {
   const clientName = themeConfig?.clientName || getEnv('VITE_CLIENT_NAME', 'Template');
 
   const handleMenuClick = (key: string) => {
-    if (onMenuClick) {
-      onMenuClick(key);
-    } else {
-      navigate(`/${key}`);
-    }
-  };
-
-  const getCurrentPage = () => {
-    return currentPage || location.pathname.replace('/', '') || 'dashboard';
+    navigate(`/${key}`);
   };
 
   return (
@@ -638,21 +636,13 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, currentPage }) => {
         >
           Campaigns
         </Button>
-        <Button 
-          type="text" 
-          style={{ color: 'white' }}
-          onClick={() => handleMenuClick('settings')}
-        >
-          Settings
-        </Button>
       </Space>
     </AntHeader>
   );
 };
-HEADEREOF
+EOF
 
-    # Footer component
-    cat > packages/components/src/Footer.tsx << 'FOOTEREOF'
+    cat > packages/components/src/Footer.tsx << 'EOF'
 import React from 'react';
 import { Layout, Typography } from '@repo/ui';
 
@@ -673,10 +663,9 @@ export const Footer: React.FC = () => {
     </AntFooter>
   );
 };
-FOOTEREOF
+EOF
 
-    # MainLayout component
-    cat > packages/components/src/MainLayout.tsx << 'MAINLAYOUTEOF'
+    cat > packages/components/src/MainLayout.tsx << 'EOF'
 import React from 'react';
 import { Layout } from '@repo/ui';
 import { Header } from './Header';
@@ -703,10 +692,10 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     </Layout>
   );
 };
-MAINLAYOUTEOF
+EOF
 
-    # Dashboard page
-    cat > packages/components/src/pages/Dashboard.tsx << 'DASHBOARDEOF'
+    # Create pages directory and basic pages
+    cat > packages/components/src/pages/Dashboard.tsx << 'EOF'
 import React from 'react';
 import { Card, Row, Col, Statistic, Button, Typography, Space, Progress } from '@repo/ui';
 import { useGetThemeConfigQuery } from '@repo/store';
@@ -723,8 +712,7 @@ export const Dashboard: React.FC = () => {
     <div>
       <Title level={2}>Dashboard</Title>
       <Paragraph>
-        Welcome to your SMS marketing dashboard. Here you can manage campaigns, 
-        track performance, and analyze your messaging data.
+        Welcome to your SMS marketing dashboard.
       </Paragraph>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
@@ -738,236 +726,41 @@ export const Dashboard: React.FC = () => {
             <Statistic title="Messages Sent" value={4587} valueStyle={{ color: primaryColor }} />
           </Card>
         </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Statistic title="Delivery Rate" value={98.2} suffix="%" valueStyle={{ color: primaryColor }} />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Statistic title="Active Subscribers" value={2450} valueStyle={{ color: primaryColor }} />
-          </Card>
-        </Col>
       </Row>
 
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
-          <Card 
-            title="Recent Performance" 
-            extra={<Button type="link" style={{ color: primaryColor }}>View All</Button>}
-          >
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span>Campaign Delivery</span>
-                  <span>92%</span>
-                </div>
-                <Progress percent={92} strokeColor={primaryColor} />
-              </div>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span>Message Engagement</span>
-                  <span>78%</span>
-                </div>
-                <Progress percent={78} strokeColor={primaryColor} />
-              </div>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span>Subscriber Growth</span>
-                  <span>65%</span>
-                </div>
-                <Progress percent={65} strokeColor={primaryColor} />
-              </div>
-            </Space>
-          </Card>
-        </Col>
-        
-        <Col xs={24} lg={12}>
-          <Card 
-            title="Quick Actions" 
-            extra={<Button type="link" style={{ color: primaryColor }}>More</Button>}
-          >
+          <Card title="Quick Actions">
             <Space direction="vertical" style={{ width: '100%' }}>
               <Button 
                 type="primary" 
                 block 
                 style={{ backgroundColor: primaryColor, borderColor: primaryColor }}
-                onClick={() => window.location.href = '/campaigns'}
               >
                 Create New Campaign
               </Button>
               <Button block>Manage Subscribers</Button>
-              <Button block>View Analytics</Button>
-              <Button block>Account Settings</Button>
             </Space>
           </Card>
         </Col>
       </Row>
-
-      {themeConfig?.features && themeConfig.features.length > 0 && (
-        <Card title="Available Features" style={{ marginTop: 24 }}>
-          <Row gutter={[16, 16]}>
-            {themeConfig.features.map((feature, index) => (
-              <Col xs={24} sm={12} md={8} key={index}>
-                <Card size="small" style={{ borderLeft: `4px solid ${primaryColor}` }}>
-                  <span style={{ color: primaryColor }}>✓</span> {feature}
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </Card>
-      )}
     </div>
   );
 };
-DASHBOARDEOF
+EOF
 
-    # Campaigns page
-    cat > packages/components/src/pages/Campaigns.tsx << 'CAMPAIGNSEOF'
-import React, { useState } from 'react';
-import { Card, Table, Button, Tag, Space, Typography, Input } from '@repo/ui';
+    cat > packages/components/src/pages/Campaigns.tsx << 'EOF'
+import React from 'react';
+import { Card, Button, Typography } from '@repo/ui';
 import { useGetThemeConfigQuery } from '@repo/store';
 import { getEnv } from '@repo/config';
 
 const { Title, Paragraph } = Typography;
-const { Search } = Input;
-
-interface Campaign {
-  id: string;
-  name: string;
-  status: 'active' | 'paused' | 'completed' | 'draft';
-  recipients: number;
-  sent: number;
-  startDate: string;
-  type: 'promotional' | 'transactional' | 'alert';
-}
-
-const mockCampaigns: Campaign[] = [
-  {
-    id: '1',
-    name: 'Welcome Series',
-    status: 'active',
-    recipients: 1500,
-    sent: 1420,
-    startDate: '2024-01-15',
-    type: 'promotional'
-  },
-  {
-    id: '2',
-    name: 'Order Confirmations',
-    status: 'active',
-    recipients: 3200,
-    sent: 3180,
-    startDate: '2024-01-10',
-    type: 'transactional'
-  },
-  {
-    id: '3',
-    name: 'Flash Sale',
-    status: 'completed',
-    recipients: 800,
-    sent: 800,
-    startDate: '2024-01-05',
-    type: 'promotional'
-  },
-  {
-    id: '4',
-    name: 'Newsletter',
-    status: 'draft',
-    recipients: 0,
-    sent: 0,
-    startDate: '2024-01-20',
-    type: 'promotional'
-  },
-];
 
 export const Campaigns: React.FC = () => {
   const clientId = getEnv('VITE_CLIENT_ID', 'default');
   const { data: themeConfig } = useGetThemeConfigQuery(clientId);
   const primaryColor = themeConfig?.primaryColor || getEnv('VITE_PRIMARY_COLOR', '#1677ff');
-  const [searchText, setSearchText] = useState('');
-
-  const getStatusColor = (status: Campaign['status']) => {
-    switch (status) {
-      case 'active': return 'green';
-      case 'paused': return 'orange';
-      case 'completed': return 'blue';
-      case 'draft': return 'gray';
-      default: return 'default';
-    }
-  };
-
-  const getTypeColor = (type: Campaign['type']) => {
-    switch (type) {
-      case 'promotional': return 'purple';
-      case 'transactional': return 'cyan';
-      case 'alert': return 'red';
-      default: return 'default';
-    }
-  };
-
-  const filteredCampaigns = mockCampaigns.filter(campaign =>
-    campaign.name.toLowerCase().includes(searchText.toLowerCase())
-  );
-
-  const columns = [
-    {
-      title: 'Campaign Name',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: Campaign['status']) => (
-        <Tag color={getStatusColor(status)}>
-          {status.toUpperCase()}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-      render: (type: Campaign['type']) => (
-        <Tag color={getTypeColor(type)}>
-          {type.toUpperCase()}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Recipients',
-      dataIndex: 'recipients',
-      key: 'recipients',
-      render: (recipients: number) => recipients.toLocaleString(),
-    },
-    {
-      title: 'Sent',
-      dataIndex: 'sent',
-      key: 'sent',
-      render: (sent: number) => sent.toLocaleString(),
-    },
-    {
-      title: 'Start Date',
-      dataIndex: 'startDate',
-      key: 'startDate',
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (_: any, record: Campaign) => (
-        <Space>
-          <Button type="link" size="small" style={{ color: primaryColor }}>
-            Edit
-          </Button>
-          <Button type="link" size="small" danger>
-            Delete
-          </Button>
-        </Space>
-      ),
-    },
-  ];
 
   return (
     <div>
@@ -987,35 +780,22 @@ export const Campaigns: React.FC = () => {
       </div>
 
       <Card>
-        <div style={{ marginBottom: 16 }}>
-          <Search
-            placeholder="Search campaigns..."
-            allowClear
-            onSearch={setSearchText}
-            style={{ width: 300 }}
-          />
-        </div>
-        
-        <Table 
-          columns={columns} 
-          dataSource={filteredCampaigns}
-          rowKey="id"
-          pagination={{ pageSize: 10 }}
-        />
+        <p>Campaign management interface coming soon...</p>
       </Card>
     </div>
   );
 };
-CAMPAIGNSEOF
+EOF
 
-    echo -e "${GREEN}✅ Shared packages created${NC}"
+    echo -e "${GREEN}✅ Components package created${NC}"
 }
 
+# Create client template
 create_client_template() {
     echo -e "${YELLOW}📱 Creating client template...${NC}"
     
     # Client template package.json
-    cat > apps/client-template/package.json << 'CLIENTPKGEOF'
+    cat > apps/client-template/package.json << 'EOF'
 {
   "name": "client-template",
   "private": true,
@@ -1055,10 +835,10 @@ create_client_template() {
     "vite": "^5.4.9"
   }
 }
-CLIENTPKGEOF
+EOF
 
     # Client template config files
-    cat > apps/client-template/tsconfig.json << 'CLIENTTSCONFIGEOF'
+    cat > apps/client-template/tsconfig.json << 'EOF'
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
@@ -1067,9 +847,9 @@ CLIENTPKGEOF
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }
-CLIENTTSCONFIGEOF
+EOF
 
-    cat > apps/client-template/tsconfig.node.json << 'CLIENTTSCONFIGNODEEOF'
+    cat > apps/client-template/tsconfig.node.json << 'EOF'
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
@@ -1082,9 +862,9 @@ CLIENTTSCONFIGEOF
   },
   "include": ["vite.config.ts"]
 }
-CLIENTTSCONFIGNODEEOF
+EOF
 
-    cat > apps/client-template/vite.config.ts << 'CLIENTVITEEOF'
+    cat > apps/client-template/vite.config.ts << 'EOF'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
@@ -1102,23 +882,23 @@ export default defineConfig({
     strictPort: true
   }
 })
-CLIENTVITEEOF
+EOF
 
-    cat > apps/client-template/tailwind.config.ts << 'CLIENTTAILWINDEOF'
+    cat > apps/client-template/tailwind.config.ts << 'EOF'
 import { themeConfig } from "@repo/theme";
 export default themeConfig;
-CLIENTTAILWINDEOF
+EOF
 
-    cat > apps/client-template/postcss.config.js << 'CLIENTPOSTCSSEOF'
+    cat > apps/client-template/postcss.config.js << 'EOF'
 export default {
   plugins: {
     tailwindcss: {},
     autoprefixer: {},
   },
 }
-CLIENTPOSTCSSEOF
+EOF
 
-    cat > apps/client-template/index.html << 'CLIENTHTMLEOF'
+    cat > apps/client-template/index.html << 'EOF'
 <!doctype html>
 <html lang="en">
   <head>
@@ -1132,25 +912,25 @@ CLIENTPOSTCSSEOF
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-CLIENTHTMLEOF
+EOF
 
     # Environment files
-    cat > apps/client-template/.env.example << 'CLIENTENVEXAMPLEEOF'
+    cat > apps/client-template/.env.example << 'EOF'
 VITE_API_URL=http://localhost:3001
 VITE_CLIENT_ID=default
 VITE_PRIMARY_COLOR=#1677ff
 VITE_CLIENT_NAME=Template Client
-CLIENTENVEXAMPLEEOF
+EOF
 
-    cat > apps/client-template/.env << 'CLIENTENVEOF'
+    cat > apps/client-template/.env << 'EOF'
 VITE_API_URL=http://localhost:3001
 VITE_CLIENT_ID=default
 VITE_PRIMARY_COLOR=#1677ff
 VITE_CLIENT_NAME=Template Client
-CLIENTENVEOF
+EOF
 
     # Client template source files
-    cat > apps/client-template/src/main.tsx << 'CLIENTMAINEOF'
+    cat > apps/client-template/src/main.tsx << 'EOF'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
@@ -1165,9 +945,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </Provider>
   </React.StrictMode>,
 )
-CLIENTMAINEOF
+EOF
 
-    cat > apps/client-template/src/index.css << 'CLIENTCSSEOF'
+    cat > apps/client-template/src/index.css << 'EOF'
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -1186,28 +966,10 @@ body {
   display: flex;
   flex-direction: column;
 }
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-CLIENTCSSEOF
+EOF
 
     # Main App file
-    cat > apps/client-template/src/App.tsx << 'CLIENTAPPEOF'
+    cat > apps/client-template/src/App.tsx << 'EOF'
 import React from 'react'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { ConfigProvider, Spin } from "@repo/ui";
@@ -1219,7 +981,7 @@ import "./App.css";
 
 const AppContent = () => {
   const clientId = getEnv('VITE_CLIENT_ID', 'default');
-  const { data: themeConfig, isLoading, error } = useGetThemeConfigQuery(clientId);
+  const { data: themeConfig, isLoading } = useGetThemeConfigQuery(clientId);
 
   const primaryColor = themeConfig?.primaryColor || getEnv('VITE_PRIMARY_COLOR', '#1677ff');
   const antdTheme = createAntdTheme(primaryColor);
@@ -1235,10 +997,6 @@ const AppContent = () => {
         <Spin size="large" />
       </div>
     );
-  }
-
-  if (error) {
-    console.error('Failed to load theme:', error);
   }
 
   const router = createBrowserRouter([
@@ -1272,16 +1030,6 @@ const AppContent = () => {
         </ConfigProvider>
       ),
     },
-    {
-      path: "/settings",
-      element: (
-        <ConfigProvider theme={antdTheme}>
-          <MainLayout>
-            <div>Settings Page - Coming Soon</div>
-          </MainLayout>
-        </ConfigProvider>
-      ),
-    },
   ]);
 
   return <RouterProvider router={router} />;
@@ -1290,14 +1038,13 @@ const AppContent = () => {
 export default function App() {
   return <AppContent />;
 }
-CLIENTAPPEOF
+EOF
 
-    cat > apps/client-template/src/App.css << 'CLIENTAPPCSSEOF'
+    cat > apps/client-template/src/App.css << 'EOF'
 #root {
   width: 100%;
 }
 
-/* Custom styles for the layout */
 .ant-layout-header {
   line-height: 1.6 !important;
 }
@@ -1306,24 +1053,9 @@ CLIENTAPPEOF
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   border: 1px solid #e8e8e8;
 }
+EOF
 
-.ant-card:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-
-/* Responsive improvements */
-@media (max-width: 768px) {
-  .ant-layout-header {
-    padding: 0 16px !important;
-  }
-  
-  .ant-layout-content {
-    padding: 16px !important;
-  }
-}
-CLIENTAPPCSSEOF
-
-    cat > apps/client-template/src/vite-env.d.ts << 'CLIENTVITEENVEOF'
+    cat > apps/client-template/src/vite-env.d.ts << 'EOF'
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
@@ -1336,204 +1068,9 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
-CLIENTVITEENVEOF
+EOF
 
     # Create public assets
     mkdir -p apps/client-template/public
-    cat > apps/client-template/public/vite.svg << 'CLIENTVITESVGEOF'
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="31.88" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 257"><defs><linearGradient id="IconifyId1813088fe1fbc01fb466" x1="-.828%" x2="57.636%" y1="7.652%" y2="78.411%"><stop offset="0%" stop-color="#41D1FF"></stop><stop offset="100%" stop-color="#BD34FE"></stop></linearGradient><linearGradient id="IconifyId1813088fe1fbc01fb467" x1="43.376%" x2="50.316%" y1="2.242%" y2="89.03%"><stop offset="0%" stop-color="#FFEA83"></stop><stop offset="8.333%" stop-color="#FFDD35"></stop><stop offset="100%" stop-color="#FFA800"></stop></linearGradient></defs><path fill="url(#IconifyId1813088fe1fbc01fb466)" d="M255.153 37.938L134.897 252.976c-2.483 4.44-8.862 4.466-11.382.048L.875 37.958c-2.746-4.814 1.371-10.646 6.827-9.67l120.385 21.517a6.537 6.537 0 0 0 2.322-.004l117.867-21.483c5.438-.991 9.574 4.796 6.877 9.62Z"></path><path fill="url(#IconifyId1813088fe1fbc01fb467)" d="M185.432.063L96.44 17.501a3.268 3.268 0 0 0-2.634 3.014l-5.474 92.456a3.268 3.268 0 0 0 3.997 3.378l24.777-5.718c2.318-.535 4.413 1.507 3.936 3.838l-7.361 36.047c-.495 2.426 1.782 4.5 4.151 3.78l15.304-4.649c2.372-.72 4.652 1.36 4.15 3.788l-11.698 56.621c-.732 3.542 3.979 5.473 5.943 2.437l1.313-2.028l72.516-144.72c1.215-2.423-.88-5.186-3.54-4.672l-25.505 4.922c-2.396.462-4.435-1.77-3.759-4.114l16.646-57.705c.677-2.35-1.37-4.583-3.769-4.113Z"></path></svg>
-CLIENTVITESVGEOF
-
-    echo -e "${GREEN}✅ Client template created${NC}"
-}
-
-create_scripts() {
-    echo -e "${YELLOW}🔧 Creating scripts...${NC}"
-    
-    # create-client.sh
-    cat > scripts/create-client.sh << 'CREATECLIENTEOF'
-#!/bin/bash
-
-set -e
-
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-if [ -z "$1" ]; then
-    echo -e "${RED}❌ Usage: $0 <client-name>${NC}"
-    echo "   Example: $0 client-a"
-    exit 1
-fi
-
-CLIENT_NAME="$1"
-TEMPLATE_DIR="apps/client-template"
-CLIENT_DIR="apps/$CLIENT_NAME"
-
-if [ -d "$CLIENT_DIR" ]; then
-    echo -e "${RED}❌ Client '$CLIENT_NAME' already exists!${NC}"
-    exit 1
-fi
-
-if [ ! -d "$TEMPLATE_DIR" ]; then
-    echo -e "${RED}❌ Template directory not found: $TEMPLATE_DIR${NC}"
-    exit 1
-fi
-
-echo -e "${YELLOW}🚀 Creating new client: $CLIENT_NAME${NC}"
-
-# Copy template
-cp -r "$TEMPLATE_DIR" "$CLIENT_DIR"
-
-# Update package.json name
-sed -i.bak "s/\"client-template\"/\"$CLIENT_NAME\"/g" "$CLIENT_DIR/package.json"
-rm -f "$CLIENT_DIR/package.json.bak"
-
-# Create custom .env with client name
-CLIENT_DISPLAY_NAME=$(echo $CLIENT_NAME | sed 's/client-//' | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}') Client
-cat > "$CLIENT_DIR/.env" << CLIENTENVEOF
-VITE_API_URL=http://localhost:3001
-VITE_CLIENT_ID=$CLIENT_NAME
-VITE_PRIMARY_COLOR=#1677ff
-VITE_CLIENT_NAME=$CLIENT_DISPLAY_NAME
-CLIENTENVEOF
-
-# Update vite server port to avoid conflicts
-sed -i.bak "s/5173/0/g" "$CLIENT_DIR/vite.config.ts"
-rm -f "$CLIENT_DIR/vite.config.ts.bak"
-
-echo -e "${GREEN}✅ Client '$CLIENT_NAME' created successfully!${NC}"
-echo ""
-echo -e "${YELLOW}🎨 Next steps:${NC}"
-echo "   1. Run 'pnpm install' to update lockfile"
-echo "   2. Edit $CLIENT_DIR/.env to customize colors and settings"
-echo "   3. Start development: pnpm turbo run dev --filter=$CLIENT_NAME"
-echo "   4. Or start all clients: pnpm dev"
-echo ""
-echo -e "${GREEN}Happy coding! 🎉${NC}"
-CREATECLIENTEOF
-
-    chmod +x scripts/create-client.sh
-    echo -e "${GREEN}✅ Scripts created${NC}"
-}
-
-create_mock_server() {
-    echo -e "${YELLOW}🎨 Creating mock server...${NC}"
-    
-    # Mock API server
-    cat > mock-server/theme-api.js << 'MOCKSERVEREOF'
-const http = require('http');
-
-const themes = {
-  'client-blue': {
-    primary_color: '#1890ff',
-    client_name: 'Blue Client',
-    features: ['SMS Campaigns', 'Analytics', 'Auto-Responses', 'Team Collaboration']
-  },
-  'client-purple': {
-    primary_color: '#722ed1',
-    client_name: 'Purple Client', 
-    features: ['SMS Campaigns', 'Team Collaboration', 'API Access']
-  },
-  'client-green': {
-    primary_color: '#52c41a',
-    client_name: 'Green Client',
-    features: ['SMS Campaigns', 'API Access', 'Webhooks', 'Advanced Analytics']
-  },
-  'client-red': {
-    primary_color: '#ff4d4f',
-    client_name: 'Red Client',
-    features: ['SMS Campaigns', 'Auto-Responses', 'Bulk Messaging']
-  },
-  'default': {
-    primary_color: '#1677ff',
-    client_name: 'Default Client',
-    features: ['SMS Campaigns', 'Basic Analytics']
-  }
-};
-
-const server = http.createServer((req, res) => {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    res.writeHead(200);
-    res.end();
-    return;
-  }
-
-  // Theme API endpoint
-  if (req.url.startsWith('/api/theme/')) {
-    const clientId = req.url.split('/').pop();
-    const theme = themes[clientId] || themes.default;
-    
-    // Simulate network delay
-    setTimeout(() => {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(theme));
-    }, 300);
-    return;
-  }
-
-  // 404 for other routes
-  res.writeHead(404);
-  res.end(JSON.stringify({ error: 'Not found' }));
-});
-
-const PORT = 3001;
-server.listen(PORT, () => {
-  console.log('🎨 Mock Theme API server running on http://localhost:' + PORT);
-  console.log('📋 Available themes:');
-  Object.keys(themes).forEach(theme => {
-    console.log(`   - ${theme}: ${themes[theme].primary_color}`);
-  });
-  console.log('\n💡 Use these client IDs in your .env files:');
-  console.log('   VITE_CLIENT_ID=client-blue (or any theme name above)');
-});
-MOCKSERVEREOF
-
-    cat > mock-server/package.json << 'MOCKPKGEOF'
-{
-  "name": "mock-server",
-  "version": "1.0.0",
-  "description": "Mock API server for theme configuration",
-  "main": "theme-api.js",
-  "scripts": {
-    "start": "node theme-api.js"
-  },
-  "dependencies": {}
-}
-MOCKPKGEOF
-
-    echo -e "${GREEN}✅ Mock server created${NC}"
-}
-
-create_readme() {
-    echo -e "${YELLOW}📚 Creating README...${NC}"
-    
-    cat > README.md << 'READMEEOF'
-# 🚀 SMS Turbo - Multi-Client Monorepo
-
-A powerful Turborepo monorepo for multi-client SMS applications with dynamic theming, shared components, and API-driven configuration.
-
-## ✨ Features
-
-- 🎨 **Dynamic Theming**: API-driven color configuration for each client
-- 📱 **Multi-Client Architecture**: Easily manage multiple client applications
-- 🏗️ **Shared Packages**: Reusable UI components, routing, state management
-- ⚡ **Turbo Powered**: Fast builds and development with Turborepo
-- 🎪 **Ant Design**: Enterprise-grade UI components with dynamic themes
-- 🎨 **Tailwind CSS**: Utility-first CSS framework
-- 🔄 **Redux Toolkit**: State management with RTK Query for API calls
-- 📊 **Ready-to-Use Templates**: Dashboard, campaigns, and layout components
-- 🔧 **Shared Components**: All components come from shared packages
-
-## 🚀 Quick Installation
-
-### One-Command Install (Recommended)
-```bash
-curl -fsSL https://raw.githubusercontent.com/codeninja-404/turbo-gist/main/install.sh | bash
+    cat > apps/client-template/public/vite.svg << 'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="31.88" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 257"><defs><linearGradient id="IconifyId1813088fe1fbc01fb466" x1="-.828%" x2="57.636%" y1="7.652%" y2="78.411%"><stop offset="0%" stop-color="#41D1FF"></stop><stop offset="100%" stop-color="#BD34FE"></stop></linearGradient><linearGradient id="IconifyId1813088fe1fbc01fb467" x1="43.376%" x2="50.316%" y1="2.242%" y2="89.03%"><stop offset="0%" stop-color="#FFEA83"></stop><stop offset="8.333%"
