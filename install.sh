@@ -54,7 +54,9 @@ echo -e "${BLUE}📥 Downloading project template...${NC}"
 create_project_structure() {
     # Create root structure
     mkdir -p apps/client-template/{public,src} 
-    mkdir -p packages/{config,router,theme,ui,utils,store/{src/{api,slices}},components/src/{pages,layout}}
+    mkdir -p packages/{config,router,theme,ui,utils,store,components}/src
+    mkdir -p packages/store/src/{api,slices}
+    mkdir -p packages/components/src/{pages,layout}
     mkdir -p scripts mock-server
 
     # Create root files
@@ -1175,10 +1177,8 @@ EOF
 
     # Main App file (simplified - uses shared components)
     cat > apps/client-template/src/App.tsx << 'EOF'
-import { useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { ConfigProvider, Spin } from "@repo/ui";
-import { AppRouter } from "@repo/router";
 import { useGetThemeConfigQuery } from "@repo/store";
 import { getEnv } from "@repo/config";
 import { createAntdTheme } from "@repo/ui";
@@ -1209,26 +1209,38 @@ const AppContent = () => {
     console.error('Failed to load theme:', error);
   }
 
-  const routes = [
-    {
-      path: "/",
-      element: (
-        <ConfigProvider theme={antdTheme}>
-          <MainLayout>
-            <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/campaigns" element={<Campaigns />} />
-              <Route path="/settings" element={<div>Settings Page - Coming Soon</div>} />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-          </MainLayout>
-        </ConfigProvider>
-      )
-    }
-  ];
-
-  return <AppRouter routes={routes} />;
+  return (
+    <ConfigProvider theme={antdTheme}>
+      <RouterProvider router={createBrowserRouter([
+        {
+          path: "/",
+          element: <MainLayout />,
+          children: [
+            {
+              index: true,
+              element: <Navigate to="/dashboard" replace />
+            },
+            {
+              path: "dashboard",
+              element: <Dashboard />
+            },
+            {
+              path: "campaigns",
+              element: <Campaigns />
+            },
+            {
+              path: "settings",
+              element: <div>Settings Page - Coming Soon</div>
+            },
+            {
+              path: "*",
+              element: <Navigate to="/dashboard" replace />
+            }
+          ]
+        }
+      ])} />
+    </ConfigProvider>
+  );
 };
 
 export default function App() {
