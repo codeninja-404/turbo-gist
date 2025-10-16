@@ -73,10 +73,16 @@ sms-turbo/
 # Create a new client
 pnpm create-client client-blue
 
+# IMPORTANT: After creating, run pnpm install to update the lockfile
+pnpm install
+
 # Create multiple clients
 pnpm create-client client-purple
+pnpm install
 pnpm create-client client-green
+pnpm install
 pnpm create-client client-red
+pnpm install
 ```
 
 ### Manual Creation
@@ -92,6 +98,10 @@ cd apps/your-client-name
 # Configure environment
 cp .env.example .env
 # Edit .env with your settings
+
+# Go back to root and update lockfile
+cd ../..
+pnpm install
 ```
 
 ## 🚀 Development
@@ -120,6 +130,8 @@ pnpm mock-api
 ```bash
 pnpm build
 ```
+
+**Note:** Avoid paths with spaces in your project directory to prevent resolution issues.
 
 ## 🎯 Shared Components
 
@@ -225,3 +237,15 @@ The included mock server provides theme configuration:
 ## 📄 License
 
 MIT License - see LICENSE file for details
+
+## 🆘 Support
+
+If you encounter any issues:
+
+1. Check the troubleshooting section in documentation
+2. Search existing GitHub issues
+3. Create a new issue with detailed information
+
+---
+
+**Happy coding! 🚀**
