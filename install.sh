@@ -54,7 +54,15 @@ echo -e "${BLUE}📥 Downloading project template...${NC}"
 create_project_structure() {
     # Create root structure
     mkdir -p apps/client-template/{public,src} 
-    mkdir -p packages/{config,router,theme,ui,utils,store/{src/{api,slices}},components/src/{pages,layout}}
+    mkdir -p packages/config/src
+    mkdir -p packages/router/src
+    mkdir -p packages/theme/src
+    mkdir -p packages/ui/src
+    mkdir -p packages/utils/src
+    mkdir -p packages/store/src
+    mkdir -p packages/store/src/{api,slices}
+    mkdir -p packages/components/src
+    mkdir -p packages/components/src/pages
     mkdir -p scripts mock-server
 
     # Create root files
@@ -193,6 +201,8 @@ EOF
     create_scripts
     # Create mock server
     create_mock_server
+    # Create README
+    create_readme
 }
 
 create_shared_packages() {
@@ -276,13 +286,7 @@ EOF
     cat > packages/theme/src/index.ts << 'EOF'
 import type { Config } from "tailwindcss";
 
-export const themeConfig: Config = {
-  darkMode: "class",
-  content: [
-    "../../apps/**/*.{js,ts,jsx,tsx}",
-    "../../packages/**/*.{js,ts,jsx,tsx}"
-  ],
-  theme: {
+export const theme: Config['theme'] = {
     extend: {
       colors: {
         primary: {
@@ -291,9 +295,7 @@ export const themeConfig: Config = {
         }
       }
     }
-  },
-  plugins: []
-};
+  };
 
 export const getRuntimeColorStyles = (primaryColor: string) => `
   .bg-primary { background-color: ${primaryColor}; }
@@ -550,6 +552,7 @@ EOF
 
     # Header component
     cat > packages/components/src/Header.tsx << 'EOF'
+import React from 'react';
 import { Layout, Typography, Space, Button } from '@repo/ui';
 import { useGetThemeConfigQuery } from '@repo/store';
 import { getEnv } from '@repo/config';
@@ -634,6 +637,7 @@ EOF
 
     # Footer component
     cat > packages/components/src/Footer.tsx << 'EOF'
+import React from 'react';
 import { Layout, Typography } from '@repo/ui';
 
 const { Footer: AntFooter } = Layout;
@@ -657,6 +661,7 @@ EOF
 
     # MainLayout component
     cat > packages/components/src/MainLayout.tsx << 'EOF'
+import React from 'react';
 import { Layout } from '@repo/ui';
 import { Header } from './Header';
 import { Footer } from './Footer';
@@ -686,6 +691,7 @@ EOF
 
     # Dashboard page
     cat > packages/components/src/pages/Dashboard.tsx << 'EOF'
+import React from 'react';
 import { Card, Row, Col, Statistic, Button, Typography, Space, Progress } from '@repo/ui';
 import { useGetThemeConfigQuery } from '@repo/store';
 import { getEnv } from '@repo/config';
@@ -802,10 +808,10 @@ EOF
 
     # Campaigns page
     cat > packages/components/src/pages/Campaigns.tsx << 'EOF'
+import React, { useState } from 'react';
 import { Card, Table, Button, Tag, Space, Typography, Input } from '@repo/ui';
 import { useGetThemeConfigQuery } from '@repo/store';
 import { getEnv } from '@repo/config';
-import { useState } from 'react';
 
 const { Title, Paragraph } = Typography;
 const { Search } = Input;
@@ -1006,6 +1012,7 @@ create_client_template() {
     "react-dom": "^18.3.1",
     "@reduxjs/toolkit": "^2.2.7",
     "react-redux": "^9.1.2",
+    "react-router-dom": "^6.30.0",
     "@repo/ui": "workspace:*",
     "@repo/router": "workspace:*",
     "@repo/theme": "workspace:*",
@@ -1022,6 +1029,8 @@ create_client_template() {
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.15",
     "tailwindcss": "^3.4.17",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.1",
     "typescript": "~5.6.2",
     "vite": "^5.4.9"
   }
@@ -1067,13 +1076,29 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
       "@repo": path.resolve(__dirname, "../../packages")
     }
+  },
+  server: {
+    port: 5173,
+    strictPort: true
   }
 })
 EOF
 
     cat > apps/client-template/tailwind.config.ts << 'EOF'
-import { themeConfig } from "@repo/theme";
-export default themeConfig;
+import type { Config } from 'tailwindcss';
+import { theme } from "@repo/theme";
+
+const config: Config = {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: theme,
+  darkMode: "class",
+  plugins: [],
+}
+
+export default config;
 EOF
 
     cat > apps/client-template/postcss.config.js << 'EOF'
@@ -1175,10 +1200,9 @@ EOF
 
     # Main App file (simplified - uses shared components)
     cat > apps/client-template/src/App.tsx << 'EOF'
-import { useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import React from 'react'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { ConfigProvider, Spin } from "@repo/ui";
-import { AppRouter } from "@repo/router";
 import { useGetThemeConfigQuery } from "@repo/store";
 import { getEnv } from "@repo/config";
 import { createAntdTheme } from "@repo/ui";
@@ -1209,26 +1233,50 @@ const AppContent = () => {
     console.error('Failed to load theme:', error);
   }
 
-  const routes = [
+  const router = createBrowserRouter([
     {
       path: "/",
       element: (
         <ConfigProvider theme={antdTheme}>
           <MainLayout>
-            <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/campaigns" element={<Campaigns />} />
-              <Route path="/settings" element={<div>Settings Page - Coming Soon</div>} />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
+            <Navigate to="/dashboard" replace />
           </MainLayout>
         </ConfigProvider>
-      )
-    }
-  ];
+      ),
+    },
+    {
+      path: "/dashboard",
+      element: (
+        <ConfigProvider theme={antdTheme}>
+          <MainLayout>
+            <Dashboard />
+          </MainLayout>
+        </ConfigProvider>
+      ),
+    },
+    {
+      path: "/campaigns",
+      element: (
+        <ConfigProvider theme={antdTheme}>
+          <MainLayout>
+            <Campaigns />
+          </MainLayout>
+        </ConfigProvider>
+      ),
+    },
+    {
+      path: "/settings",
+      element: (
+        <ConfigProvider theme={antdTheme}>
+          <MainLayout>
+            <div>Settings Page - Coming Soon</div>
+          </MainLayout>
+        </ConfigProvider>
+      ),
+    },
+  ]);
 
-  return <AppRouter routes={routes} />;
+  return <RouterProvider router={router} />;
 };
 
 export default function App() {
@@ -1283,6 +1331,7 @@ interface ImportMeta {
 EOF
 
     # Create public assets
+    mkdir -p apps/client-template/public
     cat > apps/client-template/public/vite.svg << 'EOF'
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="31.88" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 257"><defs><linearGradient id="IconifyId1813088fe1fbc01fb466" x1="-.828%" x2="57.636%" y1="7.652%" y2="78.411%"><stop offset="0%" stop-color="#41D1FF"></stop><stop offset="100%" stop-color="#BD34FE"></stop></linearGradient><linearGradient id="IconifyId1813088fe1fbc01fb467" x1="43.376%" x2="50.316%" y1="2.242%" y2="89.03%"><stop offset="0%" stop-color="#FFEA83"></stop><stop offset="8.333%" stop-color="#FFDD35"></stop><stop offset="100%" stop-color="#FFA800"></stop></linearGradient></defs><path fill="url(#IconifyId1813088fe1fbc01fb466)" d="M255.153 37.938L134.897 252.976c-2.483 4.44-8.862 4.466-11.382.048L.875 37.958c-2.746-4.814 1.371-10.646 6.827-9.67l120.385 21.517a6.537 6.537 0 0 0 2.322-.004l117.867-21.483c5.438-.991 9.574 4.796 6.877 9.62Z"></path><path fill="url(#IconifyId1813088fe1fbc01fb467)" d="M185.432.063L96.44 17.501a3.268 3.268 0 0 0-2.634 3.014l-5.474 92.456a3.268 3.268 0 0 0 3.997 3.378l24.777-5.718c2.318-.535 4.413 1.507 3.936 3.838l-7.361 36.047c-.495 2.426 1.782 4.5 4.151 3.78l15.304-4.649c2.372-.72 4.652 1.36 4.15 3.788l-11.698 56.621c-.732 3.542 3.979 5.473 5.943 2.437l1.313-2.028l72.516-144.72c1.215-2.423-.88-5.186-3.54-4.672l-25.505 4.922c-2.396.462-4.435-1.77-3.759-4.114l16.646-57.705c.677-2.35-1.37-4.583-3.769-4.113Z"></path></svg>
 EOF
@@ -1331,19 +1380,25 @@ sed -i.bak "s/\"client-template\"/\"$CLIENT_NAME\"/g" "$CLIENT_DIR/package.json"
 rm -f "$CLIENT_DIR/package.json.bak"
 
 # Create custom .env with client name
+CLIENT_DISPLAY_NAME=$(echo $CLIENT_NAME | sed 's/client-//' | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}') Client
 cat > "$CLIENT_DIR/.env" << ENV_EOF
 VITE_API_URL=http://localhost:3001
 VITE_CLIENT_ID=$CLIENT_NAME
 VITE_PRIMARY_COLOR=#1677ff
-VITE_CLIENT_NAME=$(echo $CLIENT_NAME | sed 's/client-//' | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}') Client
+VITE_CLIENT_NAME=$CLIENT_DISPLAY_NAME
 ENV_EOF
+
+# Update vite server port to avoid conflicts
+sed -i.bak "s/5173/0/g" "$CLIENT_DIR/vite.config.ts"
+rm -f "$CLIENT_DIR/vite.config.ts.bak"
 
 echo -e "${GREEN}✅ Client '$CLIENT_NAME' created successfully!${NC}"
 echo ""
 echo -e "${YELLOW}🎨 Next steps:${NC}"
-echo "   1. Edit $CLIENT_DIR/.env to customize colors and settings"
-echo "   2. Start development: pnpm turbo run dev --filter=$CLIENT_NAME"
-echo "   3. Or start all clients: pnpm dev"
+echo "   1. Run 'pnpm install' to update lockfile"
+echo "   2. Edit $CLIENT_DIR/.env to customize colors and settings"
+echo "   3. Start development: pnpm turbo run dev --filter=$CLIENT_NAME"
+echo "   4. Or start all clients: pnpm dev"
 echo ""
 echo -e "${GREEN}Happy coding! 🎉${NC}"
 EOF
@@ -1440,34 +1495,27 @@ EOF
 EOF
 }
 
-# Main execution
-create_project_structure
+create_readme() {
+    cat > README.md << 'EOF'
+# 🚀 SMS Turbo - Multi-Client Monorepo
 
-# Install dependencies
-echo -e "${BLUE}📦 Installing dependencies...${NC}"
-pnpm install
+A powerful Turborepo monorepo for multi-client SMS applications with dynamic theming, shared components, and API-driven configuration.
 
-# Make scripts executable
-chmod +x scripts/*.sh 2>/dev/null || true
+## ✨ Features
 
-echo -e "${GREEN}✅ sms-turbo installed successfully!${NC}"
-echo ""
-echo -e "${YELLOW}🎯 Quick Start:${NC}"
-echo -e "   ${BLUE}cd $PROJECT_NAME${NC}"
-echo -e "   ${BLUE}pnpm dev${NC}                         # Start all clients"
-echo ""
-echo -e "${YELLOW}🎨 Create new clients:${NC}"
-echo -e "   ${BLUE}pnpm create-client client-blue${NC}"
-echo -e "   ${BLUE}pnpm create-client client-purple${NC}"
-echo -e "   ${BLUE}pnpm create-client client-green${NC}"
-echo ""
-echo -e "${YELLOW}🚀 Start mock API server:${NC}"
-echo -e "   ${BLUE}pnpm mock-api${NC}                    # In a separate terminal"
-echo ""
-echo -e "${YELLOW}🔧 Run specific client:${NC}"
-echo -e "   ${BLUE}pnpm turbo run dev --filter=client-template${NC}"
-echo ""
-echo -e "${GREEN}📚 Full documentation:${NC}"
-echo -e "   Check README.md for detailed instructions"
-echo ""
-echo -e "${GREEN}Happy turbo-charging! 🚀${NC}"
+- 🎨 **Dynamic Theming**: API-driven color configuration for each client
+- 📱 **Multi-Client Architecture**: Easily manage multiple client applications
+- 🏗️ **Shared Packages**: Reusable UI components, routing, state management
+- ⚡ **Turbo Powered**: Fast builds and development with Turborepo
+- 🎪 **Ant Design**: Enterprise-grade UI components with dynamic themes
+- 🎨 **Tailwind CSS**: Utility-first CSS framework
+- 🔄 **Redux Toolkit**: State management with RTK Query for API calls
+- 📊 **Ready-to-Use Templates**: Dashboard, campaigns, and layout components
+- 🔧 **Shared Components**: All components come from shared packages
+
+## 🚀 Quick Installation
+
+### One-Command Install (Recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/codeninja-404/turbo-gist/main/install.sh | bash
