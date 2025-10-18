@@ -99,7 +99,8 @@ create_root_files() {
     "typescript": "~5.6.2",
     "turbo": "^2.5.8",
     "@reduxjs/toolkit": "^2.2.7",
-    "react-redux": "^9.1.2"
+    "react-redux": "^9.1.2",
+    "react-router-dom": "^6.30.0"
   },
   "packageManager": "pnpm@9.12.2",
   "engines": {
@@ -810,6 +811,7 @@ create_client_template() {
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.0",
     "@reduxjs/toolkit": "^2.2.7",
     "react-redux": "^9.1.2",
     "react-router-dom": "^6.30.0",
